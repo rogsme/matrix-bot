@@ -48,4 +48,4 @@ class OrgData(NextCloudConnection):
 
         plan = loads(plan)
 
-        return plan[-1].get_body()
+        return plan[-1].get_body().replace("[X]", "✅").replace("[  ]", "❌")
