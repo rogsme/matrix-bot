@@ -25,7 +25,7 @@ class OrgData(NextCloudConnection):
         today = self._generate_today()
 
         todo_template = f"""
-** TODO {description} :NEW: :BOT:
+** TODO {description} :NEW::BOT:
   Desired outcome: {outcome}
   :LOGBOOK:
   - Added: [{today}]
