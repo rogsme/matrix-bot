@@ -5,7 +5,7 @@ from datetime import datetime
 from orgparse import loads
 
 from nextcloud import NextCloudConnection
-from settings import ORG_CAPTURE_FILENAME, ORG_PLAN_FILENAME
+from settings import ORG_CAPTURE_FILENAME, ORG_LINKS_FILENAME, ORG_PLAN_FILENAME
 
 locale.setlocale(locale.LC_ALL, "es_ES.utf8")
 
@@ -49,3 +49,14 @@ class OrgData(NextCloudConnection):
         plan = loads(plan)
 
         return plan[-1].get_body().replace("[X]", "✅").replace("[ ]", "❌")
+
+    def add_new_link(self, link: str) -> None:
+
+        self.client.download_file(ORG_LINKS_FILENAME, "./links.org")
+
+        with open("./links.org", "a") as capture_file:
+            capture_file.write(link)
+
+        self.client.upload_file("./links.org", ORG_LINKS_FILENAME, overwrite=True)
+
+        os.remove("./links.org")

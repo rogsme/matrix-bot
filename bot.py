@@ -1,4 +1,5 @@
 import simplematrixbotlib as botlib
+import validators
 
 from bofa import BofaData
 from org import OrgData
@@ -150,6 +151,28 @@ async def list_bank_information(room, message):
             return_data += generate_return_data_from_account("itau", itau_accounts)
 
             await bot.api.send_text_message(room_id, return_data)
+
+
+@bot.listener.on_message_event
+async def save_link(room, message):
+    """
+    Function that lists banks information
+    Usage:
+    user:  !banks
+    bot:   [prints current status of banks]
+    """
+    match = botlib.MessageMatch(room, message, bot)
+    message_content = message.body
+    if match.is_not_from_this_bot() and validators.url(message_content):
+        user = message.sender
+
+        if user == MATRIX_USERNAME:
+            room_id = room.room_id
+
+            print(f"Room: {room_id}, User: {user}, Message: {message_content}")
+
+            OrgData().add_new_link(f"- {message_content}\n")
+            await bot.api.send_text_message(room_id, "Link added!")
 
 
 bot.run()
