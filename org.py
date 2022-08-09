@@ -18,14 +18,14 @@ class OrgData(NextCloudConnection):
         today_hour = today.strftime("%H:%M")
         return f"{today_ymd} {today_day} {today_hour}"
 
-    def add_new_todo(self, description: str, outcome: str, extra: str) -> None:
+    def add_new_todo(self, keyword: str, description: str, outcome: str, extra: str) -> None:
 
         self.client.download_file(ORG_CAPTURE_FILENAME, "./capture.org")
 
         today = self._generate_today()
 
         todo_template = f"""
-** TODO {description} :NEW::BOT:
+** {keyword.upper()} {description} :NEW::BOT:
   Desired outcome: {outcome}
   :LOGBOOK:
   - Added: [{today}]

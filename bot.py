@@ -31,10 +31,11 @@ async def todo(room, message):
     bot:   TODO added!
     """
     match = botlib.MessageMatch(room, message, bot, PREFIX)
-    if match.is_not_from_this_bot() and match.prefix() and match.command("todo"):
+    if match.is_not_from_this_bot() and match.prefix():
         user = message.sender
+        keyword = str(message).split()[1].replace("!", "").lower()
 
-        if user == MATRIX_USERNAME:
+        if user == MATRIX_USERNAME and keyword in ["todo", "repeat", "next", "waiting", "someday", "proj"]:
             message = " ".join(message.body.split(" ")[1:])
             room_id = room.room_id
             splitted_message = message.split("-")
@@ -54,7 +55,7 @@ async def todo(room, message):
                 todo_extra = ""
 
             print(f"Room: {room_id}, User: {user}, Message: {message}")
-            OrgData().add_new_todo(todo_title, todo_objective, todo_extra)
+            OrgData().add_new_todo(keyword, todo_title, todo_objective, todo_extra)
             await bot.api.send_text_message(room_id, "TODO added!")
 
 
