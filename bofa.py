@@ -2,13 +2,12 @@
 
 from pyexcel_ods3 import get_data
 
-from nextcloud import NextCloudConnection
 from settings import EXPENSES_FILENAME
 
 
-class BofaData(NextCloudConnection):
+class BofaData():
     def get(self) -> None:
-        with self.client.open(EXPENSES_FILENAME, mode="rb") as expenses:
+        with open(EXPENSES_FILENAME, "rb") as expenses:
             data = get_data(expenses)
             main_page = data.get("Main")
 
