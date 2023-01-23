@@ -28,7 +28,6 @@ class OrgData():
   :END:
 
   {extra}
-
 """
 
         with open(ORG_CAPTURE_FILENAME, "a") as capture_file:
