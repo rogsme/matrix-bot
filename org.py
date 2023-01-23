@@ -31,7 +31,6 @@ class OrgData():
 
 """
 
-        print(ORG_CAPTURE_FILENAME)
         with open(ORG_CAPTURE_FILENAME, "a") as capture_file:
             capture_file.write(todo_template)
 
