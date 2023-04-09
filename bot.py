@@ -214,9 +214,16 @@ async def chatgpt(room, message):
                 return {"role": "user", "content": message}
 
             personal_conversation.append(format_message(message_content))
-            completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=personal_conversation)
-            personal_conversation.append(completion.choices[0].message)
-            await bot.api.send_text_message(room_id, completion.choices[0].message.content)
+
+            try:
+                completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=personal_conversation)
+                response = completion.choices[0].message.content
+                personal_conversation.append(completion.choices[0].message)
+            except Exception as e:
+                print(f"Error: {e}")
+                response = "There was a problem with your prompt"
+
+            await bot.api.send_text_message(room_id, response)
 
 
 @bot.listener.on_message_event
@@ -257,12 +264,16 @@ async def dall_e(room, message):
             print(f"Room: {room_id}, User: {user}, Message: dalle")
             await bot.api.send_text_message(room_id, "Generating image...")
 
-            image = openai.Image.create(prompt=message)
-            image_url = image["data"][0]["url"]
-            image_filename = wget.download(image_url)
+            try:
+                image = openai.Image.create(prompt=message)
+                image_url = image["data"][0]["url"]
+                image_filename = wget.download(image_url)
 
-            await bot.api.send_image_message(room_id, image_filename)
-            os.remove(image_filename)
+                await bot.api.send_image_message(room_id, image_filename)
+                os.remove(image_filename)
+            except Exception as e:
+                print(f"Error sending image: {e}")
+                await bot.api.send_text_message(room_id, f"Error sending image: {e}")
 
 
 bot.run()
