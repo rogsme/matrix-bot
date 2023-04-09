@@ -8,6 +8,7 @@ MATRIX_URL = os.environ.get("MATRIX_URL")
 MATRIX_USER = os.environ.get("MATRIX_USER")
 MATRIX_PASSWORD = os.environ.get("MATRIX_PASSWORD")
 MATRIX_USERNAME = os.environ.get("MATRIX_USERNAME")
+MATRIX_USERNAMES = os.environ.get("MATRIX_USERNAMES")
 
 BANK_ACCOUNT_NUMBERS = os.environ.get("BANK_ACCOUNT_NUMBERS").split(",")
 
@@ -29,3 +30,5 @@ ORG_LINKS_FILENAME = f"{ORG_LOCATION}/{os.environ.get('ORG_LINKS_FILENAME')}"
 
 PROMETEO_API_KEY = os.environ.get("PROMETEO_API_KEY")
 PROMETEO_URL = os.environ.get("PROMETEO_URL")
+
+OPEN_AI_API_KEY = os.environ.get("OPEN_AI_API_KEY")

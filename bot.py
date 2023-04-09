@@ -14,12 +14,25 @@ from settings import (
     MATRIX_URL,
     MATRIX_USER,
     MATRIX_USERNAME,
+    MATRIX_USERNAMES,
+    OPEN_AI_API_KEY
 )
+import openai
+
+openai.api_key = OPEN_AI_API_KEY
 
 creds = botlib.Creds(MATRIX_URL, MATRIX_USER, MATRIX_PASSWORD)
 bot = botlib.Bot(creds)
 
 PREFIX = "!"
+
+MATRIX_USERNAMES = MATRIX_USERNAMES.split(",")
+
+starting_prompt = {"role": "system", "content": "You are a very helpful chatbot"}
+
+CONVERSATION = {}
+for username in MATRIX_USERNAMES:
+    CONVERSATION[username] = [starting_prompt]
 
 
 @bot.listener.on_message_event
@@ -175,5 +188,51 @@ async def save_link(room, message):
             OrgData().add_new_link(f"- {message_content}\n")
             await bot.api.send_text_message(room_id, "Link added!")
 
+
+@bot.listener.on_message_event
+async def chatgpt(room, message):
+    """
+    Function that starts a conversation with chatgpt
+    Usage:
+    user:  !chatgpt Hello!
+    bot:   [prints chatgpt response]
+    """
+    match = botlib.MessageMatch(room, message, bot, PREFIX)
+    message_content = message.body
+    if match.is_not_from_this_bot() and not match.prefix() and not validators.url(message_content):
+        user = message.sender
+
+        if user in MATRIX_USERNAMES:
+            personal_conversation = CONVERSATION[user]
+            room_id = room.room_id
+
+            print(f"Room: {room_id}, User: {user}, Message: chatgpt")
+
+            def format_message(message):
+                return {"role": "user", "content": message}
+
+            personal_conversation.append(format_message(message_content))
+            completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=personal_conversation)
+            personal_conversation.append(completion.choices[0].message)
+            await bot.api.send_text_message(room_id, completion.choices[0].message.content)
+
+
+@bot.listener.on_message_event
+async def reset_chatgpt(room, message):
+    """
+    Function that resets a conversation with chatgpt
+    Usage:
+    user:  !reset
+    bot:   Conversation reset!
+    """
+    match = botlib.MessageMatch(room, message, bot, PREFIX)
+    if match.is_not_from_this_bot() and match.prefix() and match.command("reset"):
+        user = message.sender
+
+        if user in MATRIX_USERNAMES:
+            CONVERSATION[user] = [starting_prompt]
+            room_id = room.room_id
+
+            await bot.api.send_text_message(room_id, "Conversation reset!")
 
 bot.run()
