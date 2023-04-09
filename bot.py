@@ -1,5 +1,8 @@
+import os
+import openai
 import simplematrixbotlib as botlib
 import validators
+import wget
 
 from bofa import BofaData
 from org import OrgData
@@ -17,7 +20,6 @@ from settings import (
     MATRIX_USERNAMES,
     OPEN_AI_API_KEY
 )
-import openai
 
 openai.api_key = OPEN_AI_API_KEY
 
@@ -234,5 +236,33 @@ async def reset_chatgpt(room, message):
             room_id = room.room_id
 
             await bot.api.send_text_message(room_id, "Conversation reset!")
+
+
+@bot.listener.on_message_event
+async def dall_e(room, message):
+    """
+    Function that generates a Dall-E image
+    Usage:
+    user:  !dalle A sunny caribbean beach
+    bot:   returns an image
+    """
+    match = botlib.MessageMatch(room, message, bot, PREFIX)
+    if match.is_not_from_this_bot() and match.prefix() and match.command("dalle"):
+        user = message.sender
+
+        if user in MATRIX_USERNAMES:
+            room_id = room.room_id
+            message = " ".join(message.body.split(" ")[1:]).strip()
+
+            print(f"Room: {room_id}, User: {user}, Message: dalle")
+            await bot.api.send_text_message(room_id, "Generating image...")
+
+            image = openai.Image.create(prompt=message)
+            image_url = image["data"][0]["url"]
+            image_filename = wget.download(image_url)
+
+            await bot.api.send_image_message(room_id, image_filename)
+            os.remove(image_filename)
+
 
 bot.run()
