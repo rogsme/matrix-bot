@@ -1,5 +1,9 @@
 # Matrix Bot
 
+<p align="center">
+  <img src="https://gitlab.com/uploads/-/system/project/avatar/38265913/logo.png" alt="Matrix Bot"/>
+</p>
+
 A Matrix bot that helps manage TODOs, track expenses, monitor bank accounts, save links, and interact with AI services - all while storing data in org-mode files.
 
 ## Features
