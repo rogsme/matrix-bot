@@ -1,4 +1,7 @@
+"""A Matrix bot that manages TODOs, expenses, and AI interactions."""
+
 import os
+
 import openai
 import simplematrixbotlib as botlib
 import validators
@@ -7,11 +10,6 @@ import wget
 from bofa import BofaData
 from org import OrgData
 from settings import (
-    BANK_ACCOUNT_NUMBERS,
-    BROU_PASSWORD,
-    BROU_USERNAME,
-    ITAU_PASSWORD,
-    ITAU_USERNAME,
     MATRIX_PASSWORD,
     MATRIX_URL,
     MATRIX_USER,
@@ -38,8 +36,8 @@ for username in MATRIX_USERNAMES:
 
 @bot.listener.on_message_event
 async def todo(room, message):
-    """
-    Function that adds new TODOs
+    """Add new TODOs with specified details.
+
     Usage:
     user:  !todo title - objective - extra (optional)
     bot:   TODO added!
@@ -70,13 +68,14 @@ async def todo(room, message):
 
             print(f"Room: {room_id}, User: {user}, Message: {message}")
             OrgData().add_new_todo(keyword, todo_title, todo_objective, todo_extra)
-            await bot.api.send_text_message(room_id, "TODO added!")
+            return await bot.api.send_text_message(room_id, "TODO added!")
+    return None
 
 
 @bot.listener.on_message_event
 async def list_todos(room, message):
-    """
-    Function that lists today's plan
+    """List today's plan from org files.
+
     Usage:
     user:  !list [free,work]
     bot:   [prints a list with today's todos]
@@ -97,13 +96,14 @@ async def list_todos(room, message):
 
             print(f"Room: {room_id}, User: {user}, Message: {message}")
             plan = OrgData().list_plan(message)
-            await bot.api.send_text_message(room_id, plan)
+            return await bot.api.send_text_message(room_id, plan)
+    return None
 
 
 @bot.listener.on_message_event
 async def list_bofa_status(room, message):
-    """
-    Function that lists bofa status
+    """Show Bank of America account status.
+
     Usage:
     user:  !bofa
     bot:   [prints bofa current status]
@@ -114,7 +114,6 @@ async def list_bofa_status(room, message):
 
         if user == MATRIX_USERNAME:
             room_id = room.room_id
-
             print(f"Room: {room_id}, User: {user}, Message: bofa")
 
             bofa_data = BofaData().get()
@@ -124,57 +123,17 @@ async def list_bofa_status(room, message):
                 if amount != "0 USD":
                     return_data += f"{person}: {amount}\n"
 
-            await bot.api.send_text_message(room_id, return_data)
-
-
-def generate_return_data_from_account(bank: str, accounts: list) -> str:
-    bank_message = f"{bank.upper()}\nNot available. Try again later!\n"
-
-    for account in accounts:
-        if account.get("number", "") in BANK_ACCOUNT_NUMBERS:
-            account_number = account.get("number", "")
-            balance = account.get("balance", "")
-
-            bank_message = f"{bank.upper()}\nAccount Number: {account_number}\nBalance: {balance} USD\n"
-    return bank_message
-
-
-@bot.listener.on_message_event
-async def list_bank_information(room, message):
-    """
-    Function that lists banks information
-    Usage:
-    user:  !banks
-    bot:   [prints current status of banks]
-    """
-    match = botlib.MessageMatch(room, message, bot, PREFIX)
-    if match.is_not_from_this_bot() and match.prefix() and match.command("banks"):
-        user = message.sender
-
-        if user == MATRIX_USERNAME:
-            room_id = room.room_id
-
-            print(f"Room: {room_id}, User: {user}, Message: banks")
-            await bot.api.send_text_message(room_id, "Looking for bank data, just a sec...")
-
-            brou_accounts = get_bank_information("brou", BROU_USERNAME, BROU_PASSWORD)
-            itau_accounts = get_bank_information("itau", ITAU_USERNAME, ITAU_PASSWORD)
-
-            return_data = ""
-            return_data += generate_return_data_from_account("brou", brou_accounts)
-            return_data += "\n"
-            return_data += generate_return_data_from_account("itau", itau_accounts)
-
-            await bot.api.send_text_message(room_id, return_data)
+            return await bot.api.send_text_message(room_id, return_data)
+    return None
 
 
 @bot.listener.on_message_event
 async def save_link(room, message):
-    """
-    Function that lists banks information
+    """Save a URL to the links file.
+
     Usage:
-    user:  !banks
-    bot:   [prints current status of banks]
+    user:  [any valid URL]
+    bot:   Link added!
     """
     match = botlib.MessageMatch(room, message, bot)
     message_content = message.body
@@ -183,17 +142,17 @@ async def save_link(room, message):
 
         if user == MATRIX_USERNAME:
             room_id = room.room_id
-
             print(f"Room: {room_id}, User: {user}, Message: {message_content}")
 
             OrgData().add_new_link(f"- {message_content}\n")
-            await bot.api.send_text_message(room_id, "Link added!")
+            return await bot.api.send_text_message(room_id, "Link added!")
+    return None
 
 
 @bot.listener.on_message_event
 async def chatgpt(room, message):
-    """
-    Function that starts a conversation with chatgpt
+    """Start a conversation with ChatGPT.
+
     Usage:
     user:  !chatgpt Hello!
     bot:   [prints chatgpt response]
@@ -222,13 +181,14 @@ async def chatgpt(room, message):
                 print(f"Error: {e}")
                 response = "There was a problem with your prompt"
 
-            await bot.api.send_text_message(room_id, response)
+            return await bot.api.send_text_message(room_id, response)
+    return None
 
 
 @bot.listener.on_message_event
 async def reset_chatgpt(room, message):
-    """
-    Function that resets a conversation with chatgpt
+    """Reset the ChatGPT conversation history.
+
     Usage:
     user:  !reset
     bot:   Conversation reset!
@@ -241,13 +201,14 @@ async def reset_chatgpt(room, message):
             CONVERSATION[user] = [starting_prompt]
             room_id = room.room_id
 
-            await bot.api.send_text_message(room_id, "Conversation reset!")
+            return await bot.api.send_text_message(room_id, "Conversation reset!")
+    return None
 
 
 @bot.listener.on_message_event
 async def dall_e(room, message):
-    """
-    Function that generates a Dall-E image
+    """Generate an image using DALL-E.
+
     Usage:
     user:  !dalle A sunny caribbean beach
     bot:   returns an image
@@ -270,9 +231,11 @@ async def dall_e(room, message):
 
                 await bot.api.send_image_message(room_id, image_filename)
                 os.remove(image_filename)
+                return None
             except Exception as e:
                 print(f"Error sending image: {e}")
-                await bot.api.send_text_message(room_id, f"Error sending image: {e}")
+                return await bot.api.send_text_message(room_id, f"Error sending image: {e}")
+    return None
 
 
 bot.run()
