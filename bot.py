@@ -168,7 +168,7 @@ async def chatgpt(room, message):
             personal_conversation.append(format_message(message_content))
 
             try:
-                completion = openai.ChatCompletion.create(model="gpt-4-1106-preview", messages=personal_conversation)
+                completion = openai.ChatCompletion.create(model="gpt-4o", messages=personal_conversation)
                 response = completion.choices[0].message.content
                 personal_conversation.append(completion.choices[0].message)
             except Exception as e:
