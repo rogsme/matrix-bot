@@ -62,12 +62,15 @@ class OrgData:
         Returns:
             str: Formatted plan with checkboxes converted to emoji markers
         """
-        with open(ORG_PLAN_FILENAME.replace("{filename}", filename), "r") as agenda:
-            plan = agenda.read()
+        try:
+            with open(ORG_PLAN_FILENAME.replace("{filename}", filename), "r") as agenda:
+                plan = agenda.read()
 
-        plan = loads(plan)
+            plan = loads(plan)
 
-        return plan[-1].get_body().replace("[X]", "✅").replace("[ ]", "❌")
+            return plan[-1].get_body().replace("[X]", "✅").replace("[ ]", "❌")
+        except FileNotFoundError:
+            return f"No plan found for {filename}."
 
     def add_new_link(self, link: str) -> None:
         """Add a new link to the links file.

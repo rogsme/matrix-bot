@@ -88,12 +88,6 @@ async def list_todos(room, message):
             message = " ".join(message.body.split(" ")[1:]).strip() or "free"
             room_id = room.room_id
 
-            if message not in ["free", "work"]:
-                return await bot.api.send_text_message(
-                    room_id,
-                    f'"{message}" not accepted. Accepted options are "free" and "work"',
-                )
-
             print(f"Room: {room_id}, User: {user}, Message: {message}")
             plan = OrgData().list_plan(message)
             return await bot.api.send_text_message(room_id, plan)
