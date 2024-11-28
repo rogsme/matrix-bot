@@ -6,7 +6,6 @@ import wget
 
 from bofa import BofaData
 from org import OrgData
-from prometeo import get_bank_information
 from settings import (
     BANK_ACCOUNT_NUMBERS,
     BROU_PASSWORD,
@@ -18,7 +17,7 @@ from settings import (
     MATRIX_USER,
     MATRIX_USERNAME,
     MATRIX_USERNAMES,
-    OPEN_AI_API_KEY
+    OPEN_AI_API_KEY,
 )
 
 openai.api_key = OPEN_AI_API_KEY
