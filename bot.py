@@ -1,13 +1,11 @@
 """A Matrix bot that manages TODOs, expenses, and AI interactions."""
 
-import os
 
-import openai
 import simplematrixbotlib as botlib
 import validators
-import wget
 
 from bofa import BofaData
+from ollama_client import OllamaClient
 from org import OrgData
 from settings import (
     MATRIX_PASSWORD,
@@ -15,10 +13,12 @@ from settings import (
     MATRIX_USER,
     MATRIX_USERNAME,
     MATRIX_USERNAMES,
-    OPEN_AI_API_KEY,
+    OLLAMA_BASE_URL,  # New setting for Ollama
+    OLLAMA_MODEL,  # New setting for Ollama model
 )
 
-openai.api_key = OPEN_AI_API_KEY
+# Initialize the Ollama client
+ollama = OllamaClient(base_url=OLLAMA_BASE_URL, model=OLLAMA_MODEL)
 
 creds = botlib.Creds(MATRIX_URL, MATRIX_USER, MATRIX_PASSWORD)
 bot = botlib.Bot(creds)
@@ -144,12 +144,12 @@ async def save_link(room, message):
 
 
 @bot.listener.on_message_event
-async def chatgpt(room, message):
-    """Start a conversation with ChatGPT.
+async def chatbot(room, message):
+    """Start a conversation with the Ollama model.
 
     Usage:
-    user:  !chatgpt Hello!
-    bot:   [prints chatgpt response]
+    user:  Any message
+    bot:   [prints Ollama model response]
     """
     match = botlib.MessageMatch(room, message, bot, PREFIX)
     message_content = message.body
@@ -160,7 +160,7 @@ async def chatgpt(room, message):
             personal_conversation = CONVERSATION[user]
             room_id = room.room_id
 
-            print(f"Room: {room_id}, User: {user}, Message: chatgpt")
+            print(f"Room: {room_id}, User: {user}, Message: chat with Ollama")
 
             def format_message(message):
                 return {"role": "user", "content": message}
@@ -168,9 +168,10 @@ async def chatgpt(room, message):
             personal_conversation.append(format_message(message_content))
 
             try:
-                completion = openai.ChatCompletion.create(model="gpt-4o", messages=personal_conversation)
-                response = completion.choices[0].message.content
-                personal_conversation.append(completion.choices[0].message)
+                # Using Ollama instead of OpenAI
+                completion = ollama.chat_completion(personal_conversation)
+                response = completion["choices"][0]["message"]["content"]
+                personal_conversation.append(completion["choices"][0]["message"])
             except Exception as e:
                 print(f"Error: {e}")
                 response = "There was a problem with your prompt"
@@ -180,8 +181,8 @@ async def chatgpt(room, message):
 
 
 @bot.listener.on_message_event
-async def reset_chatgpt(room, message):
-    """Reset the ChatGPT conversation history.
+async def reset_chat(room, message):
+    """Reset the chat conversation history.
 
     Usage:
     user:  !reset
@@ -200,12 +201,12 @@ async def reset_chatgpt(room, message):
 
 
 @bot.listener.on_message_event
-async def dall_e(room, message):
-    """Generate an image using DALL-E.
+async def dalle(room, message):
+    """Generate an image (feature not available with Ollama).
 
     Usage:
     user:  !dalle A sunny caribbean beach
-    bot:   returns an image
+    bot:   returns an error message
     """
     match = botlib.MessageMatch(room, message, bot, PREFIX)
     if match.is_not_from_this_bot() and match.prefix() and match.command("dalle"):
@@ -213,22 +214,12 @@ async def dall_e(room, message):
 
         if user in MATRIX_USERNAMES:
             room_id = room.room_id
-            message = " ".join(message.body.split(" ")[1:]).strip()
 
-            print(f"Room: {room_id}, User: {user}, Message: dalle")
-            await bot.api.send_text_message(room_id, "Generating image...")
-
-            try:
-                image = openai.Image.create(prompt=message)
-                image_url = image["data"][0]["url"]
-                image_filename = wget.download(image_url)
-
-                await bot.api.send_image_message(room_id, image_filename)
-                os.remove(image_filename)
-                return None
-            except Exception as e:
-                print(f"Error sending image: {e}")
-                return await bot.api.send_text_message(room_id, f"Error sending image: {e}")
+            return await bot.api.send_text_message(
+                room_id,
+                "Image generation is not available with the Ollama integration. "
+                "Please consider using a dedicated image generation service.",
+            )
     return None
 
 
