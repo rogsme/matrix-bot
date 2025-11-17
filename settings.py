@@ -19,5 +19,7 @@ ORG_CAPTURE_FILENAME = f"{ORG_LOCATION}/{os.environ.get('ORG_CAPTURE_FILENAME')}
 ORG_PLAN_FILENAME = f"{ORG_LOCATION}/{os.environ.get('ORG_PLAN_FILENAME')}"
 ORG_LINKS_FILENAME = f"{ORG_LOCATION}/{os.environ.get('ORG_LINKS_FILENAME')}"
 
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2:latest")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o")
+OPENROUTER_SITE_URL = os.environ.get("OPENROUTER_SITE_URL", "")
+OPENROUTER_SITE_NAME = os.environ.get("OPENROUTER_SITE_NAME", "")

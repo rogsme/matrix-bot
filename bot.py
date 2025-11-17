@@ -1,11 +1,10 @@
 """A Matrix bot that manages TODOs, expenses, and AI interactions."""
 
-
 import simplematrixbotlib as botlib
 import validators
 
 from bofa import BofaData
-from ollama_client import OllamaClient
+from openrouter_client import OpenRouterClient
 from org import OrgData
 from settings import (
     MATRIX_PASSWORD,
@@ -13,12 +12,19 @@ from settings import (
     MATRIX_USER,
     MATRIX_USERNAME,
     MATRIX_USERNAMES,
-    OLLAMA_BASE_URL,  # New setting for Ollama
-    OLLAMA_MODEL,  # New setting for Ollama model
+    OPENROUTER_API_KEY,
+    OPENROUTER_MODEL,
+    OPENROUTER_SITE_NAME,
+    OPENROUTER_SITE_URL,
 )
 
-# Initialize the Ollama client
-ollama = OllamaClient(base_url=OLLAMA_BASE_URL, model=OLLAMA_MODEL)
+# Initialize the OpenRouter client
+openrouter = OpenRouterClient(
+    api_key=OPENROUTER_API_KEY,
+    model=OPENROUTER_MODEL,
+    site_url=OPENROUTER_SITE_URL,
+    site_name=OPENROUTER_SITE_NAME,
+)
 
 creds = botlib.Creds(MATRIX_URL, MATRIX_USER, MATRIX_PASSWORD)
 bot = botlib.Bot(creds)
@@ -145,11 +151,11 @@ async def save_link(room, message):
 
 @bot.listener.on_message_event
 async def chatbot(room, message):
-    """Start a conversation with the Ollama model.
+    """Start a conversation with the AI model via OpenRouter.
 
     Usage:
     user:  Any message
-    bot:   [prints Ollama model response]
+    bot:   [prints AI model response]
     """
     match = botlib.MessageMatch(room, message, bot, PREFIX)
     message_content = message.body
@@ -168,8 +174,8 @@ async def chatbot(room, message):
             personal_conversation.append(format_message(message_content))
 
             try:
-                # Using Ollama instead of OpenAI
-                completion = ollama.chat_completion(personal_conversation)
+                # Using OpenRouter
+                completion = openrouter.chat_completion(personal_conversation)
                 response = completion["choices"][0]["message"]["content"]
                 personal_conversation.append(completion["choices"][0]["message"])
             except Exception as e:
@@ -202,7 +208,7 @@ async def reset_chat(room, message):
 
 @bot.listener.on_message_event
 async def dalle(room, message):
-    """Generate an image (feature not available with Ollama).
+    """Generate an image (feature requires specific model support).
 
     Usage:
     user:  !dalle A sunny caribbean beach
@@ -217,8 +223,8 @@ async def dalle(room, message):
 
             return await bot.api.send_text_message(
                 room_id,
-                "Image generation is not available with the Ollama integration. "
-                "Please consider using a dedicated image generation service.",
+                "Image generation requires a dedicated image generation model. "
+                "Please consider using a model like DALL-E through OpenRouter or a dedicated service.",
             )
     return None
 

@@ -27,7 +27,8 @@ A Matrix bot that helps manage TODOs, track expenses, monitor bank accounts, sav
   - Auto-saves any shared URL to an org-mode file
 
 - **AI Integration**:
-  - Chat with Llama 3.2 via Ollama (continues conversation)
+  - Chat with AI models via OpenRouter (continues conversation)
+  - Access to hundreds of models including GPT-4, Claude, Llama, and more
   - `!reset` - Reset chat history
 
 ## Setup
@@ -37,13 +38,10 @@ A Matrix bot that helps manage TODOs, track expenses, monitor bank accounts, sav
 poetry install
 ```
 
-2. Install and run Ollama:
-   - Follow the instructions at [Ollama's website](https://ollama.ai/) to install Ollama
-   - Pull the Llama 3.2 model:
-   ```bash
-   ollama pull llama3.2:latest
-   ```
-   - Start the Ollama server (it typically runs on port 11434)
+2. Get an OpenRouter API key:
+   - Sign up at [OpenRouter](https://openrouter.ai/)
+   - Generate an API key at [https://openrouter.ai/keys](https://openrouter.ai/keys)
+   - Browse available models at [https://openrouter.ai/models](https://openrouter.ai/models)
 
 3. Create a `.env` file with the following variables:
 ```
@@ -61,9 +59,11 @@ ORG_CAPTURE_FILENAME=
 ORG_PLAN_FILENAME=
 ORG_LINKS_FILENAME=
 
-# Ollama Configuration
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2:latest
+# OpenRouter Configuration
+OPENROUTER_API_KEY=your-openrouter-api-key
+OPENROUTER_MODEL=openai/gpt-4o  # or anthropic/claude-3.5-sonnet, meta-llama/llama-3.1-70b-instruct, etc.
+OPENROUTER_SITE_URL=  # Optional: for OpenRouter rankings
+OPENROUTER_SITE_NAME=  # Optional: for OpenRouter rankings
 ```
 
 4. Run the bot:
@@ -76,13 +76,13 @@ python bot.py
 - Python 3.9+
 - Poetry for dependency management
 - Matrix server access
+- OpenRouter API key (get one at [https://openrouter.ai/keys](https://openrouter.ai/keys))
 - Optional: Bank accounts with Bank of America for banking features
-- Ollama installed and running with the llama3.2:latest model
 
 ## Project Structure
 
 - `bot.py`: Main bot implementation with command handlers
-- `ollama_client.py`: Ollama API client for AI features
+- `ollama_client.py`: OpenRouter API client for AI features
 - `bofa.py`: Bank of America data processing
 - `org.py`: Org-mode file management
 - `settings.py`: Environment configuration
@@ -92,5 +92,5 @@ python bot.py
 Key dependencies include:
 - `simplematrixbotlib`: Matrix bot framework
 - `orgparse`: Org-mode file parsing
-- `requests`: API interactions with Ollama
+- `requests`: API interactions with OpenRouter
 - `pyexcel-ods3`: Spreadsheet processing
