@@ -82,7 +82,7 @@ python bot.py
 ## Project Structure
 
 - `bot.py`: Main bot implementation with command handlers
-- `ollama_client.py`: OpenRouter API client for AI features
+- `openrouter_client.py`: OpenRouter API client for AI features
 - `bofa.py`: Bank of America data processing
 - `org.py`: Org-mode file management
 - `settings.py`: Environment configuration
